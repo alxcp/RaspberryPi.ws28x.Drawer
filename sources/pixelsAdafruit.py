@@ -4,7 +4,8 @@ import time
 import colorsys
 import random
 import os,sys
-from effects.pixelEffects import *
+import pixelsEffects
+from pixelsEffects import *
 
 class NeoPixelDrawer(object):
     def __init__(self, nLED):
@@ -41,6 +42,6 @@ drawer = NeoPixelDrawer(300)
 #e = pixelsEffects.switchColors
 #run_effect(e,300,8)
 pixelsEffects.intensity = 50
-pixelsEffects.runWithDrawer(drawer, pixelsEffects.waves)
+pixelsEffects.runWithDrawer(drawer, waves)
 #pixelsEffects.runRandomized(drawer)
 
