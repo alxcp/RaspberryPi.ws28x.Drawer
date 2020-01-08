@@ -3,7 +3,8 @@ import neopixel
 import time
 import colorsys
 import random
-import pixelsEffects
+import os,sys
+from effects.pixelEffects import *
 
 class NeoPixelDrawer(object):
     def __init__(self, nLED):
