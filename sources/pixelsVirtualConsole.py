@@ -19,7 +19,8 @@ class ConsoleDrawer(object):
         row = ""        
         for position in range(0, self.nLED - 1):
             pixel = self.pixels[position]
-            row += color(" ", back=(pixel.R, pixel.G, pixel.B))
+            #row += color(" ", back=(pixel.R, pixel.G, pixel.B))
+            row += color("▌", fore=(pixel.R, pixel.G, pixel.B))
         print('\r'+row, end='\r')
 
     def Clear(self):
@@ -41,10 +42,13 @@ drawer = ConsoleDrawer(100)
 #e = pixelsEffects.randomBlinks
 #e = pixelsEffects.color_bounce
 #e = pixelsEffects.rule30
+e = waves
 #e = stripes
 #e = rings
 #e = boom
 #run_effect(e,300,8)
-pixelsEffects.intensity = 200
-#pixelsEffects.runWithDrawer(drawer, e)
-pixelsEffects.runRandomized(drawer)
+correctGammaDefault = False
+pixelsEffects.intensityMin = 170
+pixelsEffects.intensity = 255
+pixelsEffects.runWithDrawer(drawer, e)
+#pixelsEffects.runRandomized(drawer)
