@@ -209,11 +209,10 @@ def fullFade(drawer, timeout):
         time.sleep(0.1)
 
 def waves(drawer, timeout):
-    steps = 100
+    steps = 300
     currentStep = 0
-    cycles = 400
+    cycles = 1400
     currentCycle = 0
-    colorTransitionCycles = 200
     targetColor = getRandomColor(2,10,100)
     targetTransitColor = targetColor
     stepsCache = []

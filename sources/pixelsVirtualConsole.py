@@ -3,8 +3,7 @@ import colorsys
 import random
 from colr import color
 import pixelsEffects
-
-blinks = []
+from pixelsEffects import *
 
 class ConsoleDrawer(object):
     def __init__(self, nLED):
