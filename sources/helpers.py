@@ -6,21 +6,22 @@ import random
 import math
 from colr import color
 
-intensityMin = 4
-intensity = 20
-calibrateTable = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1,  1,  1,  1, 1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2, 2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5, 5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10, 10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25, 25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36, 37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50, 51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68, 69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89, 90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114, 115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142, 144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175, 177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213, 215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255]
-correctGammaDefault = True
+class ColorRGB(object):    
+    def __init__(self, r = 0, g = 0, b = 0, drawer = None, correctGamma = None):
+        if correctGamma and drawer is None:
+            raise Exception("You need to provide drawer in order to use gamma correction")
 
-class ColorRGB(object):
-    
-    def __init__(self, r = 0, g = 0, b = 0, correctGamma = None):
         if correctGamma is None:
-            correctGamma = correctGammaDefault
+            if not drawer is None:
+                correctGamma = drawer.CorrectGammaDefault                
+            else:
+                correctGamma = False
 
         if correctGamma:
-            self.R = calibrateTable[int(r)]
-            self.G = calibrateTable[int(g)]
-            self.B = calibrateTable[int(b)]
+            calibrationTable = drawer.CalibrationTable
+            self.R = calibrationTable[int(r)]
+            self.G = calibrationTable[int(g)]
+            self.B = calibrationTable[int(b)]
         else:
             self.R = int(r)
             self.G = int(g)
@@ -40,13 +41,28 @@ class ColorRGB(object):
 
         return ColorRGB(r,g,b)
 
-    def setComponent(self, channelNumber, value):
+    def setComponent(self, channelNumber, value, drawer = None):
+        r = 0
+        g = 0
+        b = 0
+
         if channelNumber == 0:
-            self.R = value
+            r = value
         elif channelNumber == 1:
-            self.G = value
+            g = value
         elif channelNumber == 2:
-            self.B = value
+            b = value
+
+        if not drawer is None:
+            r = drawer.CalibrationTable[r]
+            g = drawer.CalibrationTable[g]
+            b = drawer.CalibrationTable[b]
+
+        self.R = r
+        self.G = g
+        self.B = b
+
+        
 
     def ToString(self):
         return "(" + str(self.R) + ", " + str(self.G) + ", " + str(self.B) + ")"
@@ -63,17 +79,17 @@ class TimeoutInfinite(object):
     def IsExpired(self):
         return False
 
-def getRandomColor(maxChannelCount=3, minIntensity = 0, maxIntensity = 255):
-    result = ColorRGB()
+def getRandomColor(maxChannelCount=3, intensityMin = 0, intensityMax = 255, drawer=None):
+    result = ColorRGB(drawer=drawer)
     if maxChannelCount == 1:
-        result.setComponent(random.randint(0,2), random.randint(minIntensity, maxIntensity))
+        result.setComponent(random.randint(0,2), random.randint(intensityMin, intensityMax), drawer)
     elif maxChannelCount == 2:
-        result.setComponent(random.randint(0,2), random.randint(minIntensity, maxIntensity))
-        result.setComponent(random.randint(0,2), random.randint(minIntensity, maxIntensity))
+        result.setComponent(random.randint(0,2), random.randint(intensityMin, intensityMax), drawer)
+        result.setComponent(random.randint(0,2), random.randint(intensityMin, intensityMax), drawer)
     elif maxChannelCount == 3:
-        result.setComponent(random.randint(0,2), random.randint(minIntensity, maxIntensity))
-        result.setComponent(random.randint(0,2), random.randint(minIntensity, maxIntensity))
-        result.setComponent(random.randint(0,2), random.randint(minIntensity, maxIntensity))
+        result.setComponent(random.randint(0,2), random.randint(intensityMin, intensityMax), drawer)
+        result.setComponent(random.randint(0,2), random.randint(intensityMin, intensityMax), drawer)
+        result.setComponent(random.randint(0,2), random.randint(intensityMin, intensityMax), drawer)
     return result
 
 def getRandomPredefinedColor():

@@ -16,7 +16,7 @@ def rainbow_hsv(drawer, timeout):
     while not timeout.IsExpired():
         for z in range(0,drawer.nLED - 1):
             pixel = colorsys.hsv_to_rgb((z + translate) * p, 1, 1)
-            intens = intensity
+            intens = drawer.IntensityMax
             if random.randint(0,5000) < 5:
                 intens = 255
 
@@ -28,6 +28,7 @@ def rainbow_hsv(drawer, timeout):
 
 def stripes(drawer, timeout):
     nLED = drawer.nLED
+    intensity = drawer.IntensityMax
 
     while not timeout.IsExpired():
         stripeLen = random.randint(0,nLED / 10)
@@ -48,14 +49,12 @@ def rainbow_hsv2(drawer, timeout):
     translate = 0
     translateIncr = 1
     p = 1.0 / (nLED * 5)
+    intensity = drawer.IntensityMax
 
     while not timeout.IsExpired():
         for z in range(nLED):
             pixel = colorsys.hsv_to_rgb((z + translate) * p, 1, 1)
-            intens = intensity
-            #if random.randint(0,50000) < 1:
-            #    intens = 255
-            drawer.SetColor(z, ColorRGB(pixel[0] * intens, pixel[1] * intens, pixel[2] * intens))
+            drawer.SetColor(z, ColorRGB(pixel[0] * intensity, pixel[1] * intensity, pixel[2] * intensity))
         drawer.Show()
 
         if translate==nLED * 30:
@@ -122,6 +121,7 @@ def randomBlinks(drawer, timeout):
     nLED = drawer.nLED
     blinks = []  
     maxLeds = 10  
+    intensity = drawer.IntensityMax
 
     while not timeout.IsExpired():
         if (len(blinks)<maxLeds):
@@ -149,6 +149,7 @@ def randomBlinks(drawer, timeout):
 def color_bounce(drawer, timeout):                         #-m5-BOUNCE COLOR (SINGLE LED)
     bounceDirection = 0
     idex = 0
+    intensity = drawer.IntensityMax
 
     while not timeout.IsExpired():
         if bounceDirection == 0:
@@ -173,6 +174,7 @@ def color_bounce(drawer, timeout):                         #-m5-BOUNCE COLOR (SI
 def randomRed(drawer):
     temprand = 0
     nLED = drawer.nLED
+    intensity = drawer.IntensityMax
 
     for i in range(0, nLED - 1):
         temprand = random.randint(0, 100)
@@ -213,13 +215,15 @@ def waves(drawer, timeout):
     currentStep = 0
     cycles = 1400
     currentCycle = 0
-    targetColor = getRandomColor(2,intensityMin,intensity)
+    intensityMin = drawer.IntensityMin
+    intensityMax = drawer.IntensityMax
+    targetColor = getRandomColor(2,intensityMin,intensityMax, drawer)
     transitionCycle = -1
 
     while not timeout.IsExpired():
         if currentCycle >= cycles:
             if currentCycle == cycles:
-                targetTransitionColor = getRandomColor(2,intensityMin,intensity)
+                targetTransitionColor = getRandomColor(2,intensityMin,intensityMax, drawer)
                 #print ("prevColor: " + targetColor.ToString() + ", ttr: " + targetTransitionColor.ToString())
 
             transitionCycle = currentCycle - cycles
