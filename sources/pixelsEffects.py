@@ -217,14 +217,13 @@ def waves(drawer, timeout):
     currentCycle = 0
     intensityMin = drawer.IntensityMin
     intensityMax = drawer.IntensityMax
-    targetColor = getRandomColor(2,intensityMin,intensityMax, drawer)
+    targetColor = getRandomColor(2,intensityMin,intensityMax)
     transitionCycle = -1
 
     while not timeout.IsExpired():
         if currentCycle >= cycles:
             if currentCycle == cycles:
-                targetTransitionColor = getRandomColor(2,intensityMin,intensityMax, drawer)
-                #print ("prevColor: " + targetColor.ToString() + ", ttr: " + targetTransitionColor.ToString())
+                targetTransitionColor = getRandomColor(2,intensityMin,intensityMax)
 
             transitionCycle = currentCycle - cycles
             
