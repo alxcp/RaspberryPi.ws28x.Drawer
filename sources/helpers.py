@@ -6,6 +6,7 @@ import random
 import math
 from colr import color
 
+
 class DrawerBase(object):
     CalibrationTable = [range(0,255)]
     CorrectGammaDefault = False
@@ -29,6 +30,8 @@ class DrawerBase(object):
 
     def CalibrateColor(self, color):
         return ColorRGB(self.CalibrationTable[color.R], self.CalibrationTable[color.G], self.CalibrationTable[color.B])
+
+
 
 
 class ColorRGB(object):    
