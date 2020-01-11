@@ -57,7 +57,7 @@ drawer = ConsoleDrawer(150)
 #e = pixelsEffects.randomBlinks
 #e = pixelsEffects.color_bounce
 #e = pixelsEffects.rule30
-#e = waves
+e = WavesEffect(1000, 6000)
 #e = stripes
 #e = rings
 #e = boom
@@ -66,7 +66,8 @@ drawer = ConsoleDrawer(150)
 
 #drawer.PlayEffect(e)
 effects = PixelEffectsRegistry()
-effects.PlayRandomizedEffect(drawer)
+effects.PlayEffect(drawer, e)
+#effects.PlayRandomizedEffect(drawer)
 
 
 #pixelsEffects.runRandomized(drawer)

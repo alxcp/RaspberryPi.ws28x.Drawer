@@ -18,7 +18,7 @@ class PixelEffectsRegistry(object):
         self.Register(BeadsEffect())
         self.Register(RandomBlinksEffect())
         self.Register(FullFadeEffect())
-        self.Register(WavesEffect())
+        self.Register(WavesEffect(400, 4000))
         self.Register(RandomReplacementEffect())
         self.Register(SwitchColorsEffect())
         self.Register(DropsEffect())
@@ -257,10 +257,12 @@ class FullFadeEffect(PixelEffect):
             time.sleep(0.1)
 
 class WavesEffect(PixelEffect):
+    def __init__(self, steps, cycles):
+        self.Steps = steps
+        self.Cycles = cycles
+
     def Play(self, drawer, timeout):
-        steps = 300
         currentStep = 0
-        cycles = 1400
         currentCycle = 0
         intensityMin = drawer.IntensityMin
         intensityMax = drawer.IntensityMax
@@ -268,8 +270,8 @@ class WavesEffect(PixelEffect):
         transitionCycle = -1
 
         while not timeout.IsExpired():
-            if currentCycle >= cycles:
-                if currentCycle == cycles:
+            if currentCycle >= self.Cycles:
+                if currentCycle == self.Cycles:
                     targetTransitionColor = getRandomColor(2,intensityMin,intensityMax)
 
                 transitionCycle = currentCycle - cycles
@@ -283,7 +285,7 @@ class WavesEffect(PixelEffect):
             currentStep = currentStep + 1
 
             for z in range(0, drawer.nLED -1):
-                m = abs(math.sin((z + currentStep) / steps))
+                m = abs(math.sin((z + currentStep) / self.Steps))
                 
                 if z <= transitionCycle:                
                     c = targetTransitionColor
@@ -415,6 +417,8 @@ class Thread(PixelEffect):
     def Play(self, drawer, timeout):    
         for lastNumber in range(drawer.nLED - 1, 0, -1):
             ledColor = getRandomColor(2,3,20)
+            if timeout.IsExpired:
+                return
             for ledNumber in range(1,lastNumber):
                 drawer.SetColor(ledNumber,ledColor)
                 drawer.SetColor(ledNumber-1,ColorRGB())
@@ -425,6 +429,8 @@ class Thread2(PixelEffect):
         nCL=int(drawer.nLED/2)
         for lastNumber in range(1,nCL- 1):
             ledColor = getRandomColor(2,3,20)
+            if timeout.IsExpired:
+                return
             for ledNumber in range(1,nCL - lastNumber):            
                 drawer.SetColor(nCL-ledNumber,ledColor)
                 drawer.SetColor(nCL-ledNumber+1,ColorRGB())
