@@ -32,43 +32,34 @@ class DrawerBase(object):
         return ColorRGB(self.CalibrationTable[color.R], self.CalibrationTable[color.G], self.CalibrationTable[color.B])
 
 
-
-
 class ColorRGB(object):    
     def __init__(self, r = 0, g = 0, b = 0):
         self.R = int(r)
         self.G = int(g)
         self.B = int(b)
 
-    def multiply(self, k):
-        r = self.R * k
-        g = self.G * k
-        b = self.B * k
+    def multiply(self, k, doNotLooseComponents = False):
+        r = min(int(self.R * k), 255)
+        g = min(int(self.G * k), 255)
+        b = min(int(self.B * k), 255)
 
-        if r > 255:
-            r = 255
-        if g > 255:
-            g = 255
-        if b > 255:
-            b = 255
+        if doNotLooseComponents:
+            if self.R > 0 and r == 0:
+                r = 1
+            if self.G > 0 and g == 0:
+                g = 1
+            if self.B > 0 and b == 0:
+                b = 1
 
-        return ColorRGB(r,g,b)
+        return ColorRGB(r, g, b)
 
     def setComponent(self, channelNumber, value, drawer = None):
-        r = 0
-        g = 0
-        b = 0
-
         if channelNumber == 0:
-            r = value
+            self.R = value
         elif channelNumber == 1:
-            g = value
+            self.G = value
         elif channelNumber == 2:
-            b = value
-
-        self.R = r
-        self.G = g
-        self.B = b        
+            self.B = value
 
     def ToString(self):
         return "(" + str(self.R) + ", " + str(self.G) + ", " + str(self.B) + ")"

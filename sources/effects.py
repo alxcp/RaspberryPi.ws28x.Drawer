@@ -268,13 +268,14 @@ class WavesEffect(PixelEffect):
         intensityMax = drawer.IntensityMax
         targetColor = getRandomColor(2,intensityMin,intensityMax)
         transitionCycle = -1
+        cycles = self.Cycles
 
         while not timeout.IsExpired():
             if currentCycle >= self.Cycles:
                 if currentCycle == self.Cycles:
                     targetTransitionColor = getRandomColor(2,intensityMin,intensityMax)
 
-                transitionCycle = currentCycle - cycles
+                transitionCycle = currentCycle - self.Cycles
                 
                 if transitionCycle == drawer.nLED:
                     transitionCycle = -1
@@ -300,6 +301,43 @@ class WavesEffect(PixelEffect):
                     mC.G = 1
                 if mC.B == 0 and c.B > 0:
                     mC.B = 1
+                drawer.SetColor(z, mC)
+                
+            drawer.Show()
+
+class RainbowWavesEffect(PixelEffect):
+    def __init__(self, steps, cycles):
+        self.Steps = steps
+        self.Cycles = cycles
+
+    def Play(self, drawer, timeout):
+        currentStep = 0
+        currentCycle = 0
+        #intensityMin = drawer.IntensityMin
+        intensityMax = drawer.IntensityMax
+        #targetColor = getRandomColor(2,intensityMin,intensityMax)
+        transitionCycle = -1
+        #cycles = self.Cycles
+
+        #translate = 0
+        #translateIncr = 1
+        p = 1.0 / (drawer.nLED * 5)
+        
+        while not timeout.IsExpired():
+            if currentCycle >= self.Cycles:
+                transitionCycle = transitionCycle + 1                
+                if currentCycle - self.Cycles == drawer.nLED:
+                    currentCycle = 0
+
+            currentCycle = currentCycle + 1
+            currentStep = currentStep + 1
+
+            for z in range(0, drawer.nLED -1):
+                pixel = colorsys.hsv_to_rgb((z + transitionCycle) * p, 1, 1)
+
+                m = abs(math.sin((z + currentStep) / self.Steps))                
+                c = ColorRGB(pixel[0] * intensityMax, pixel[1] * intensityMax, pixel[2] * intensityMax)
+                mC = c.multiply(m, True)
                 drawer.SetColor(z, mC)
                 
             drawer.Show()
@@ -446,6 +484,35 @@ class Skittles(PixelEffect):
                 drawer.SetColor(z, getRandomColor(2,3,20))
             drawer.Show()
             time.sleep(3)
+
+class ColorRunaway(PixelEffect):
+    def Play(self, drawer, timeout):    
+        while not timeout.IsExpired():
+            ps = random.randint(0, drawer.nLED-1)
+            pl = pr = ps
+            color = getRandomColor(2, drawer.IntensityMin, drawer.IntensityMax)
+            speed = 0
+            drawer.SetColor(ps, color)
+            drawer.Show()
+            while True:
+                speed += 1
+                pl -= speed
+                pr += speed
+
+                if pl < 0 or pr > drawer.nLED - 1:
+                    #print ("Brake")
+                    break
+
+                for p in range(pl,pr):
+                    drawer.SetColor(p,color)
+                
+                drawer.Show()
+                time.sleep(0.1)
+
+
+
+                #print ("pl: " + str(pl) + ", pr: " + str(pr))
+                #time.sleep(1)
 
 
 
