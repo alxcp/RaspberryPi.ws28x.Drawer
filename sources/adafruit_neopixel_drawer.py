@@ -53,7 +53,7 @@ class NeoPixelDrawer(DrawerBase):
         self.Clear()
         self.pixels_indexes = range(0, nLED - 1)
 
-    def SetColor(self, position, color, calibrate = None):
+    def set_color(self, position, color, calibrate = None):
         if calibrate is None:
             calibrate = self.calibrate
         
@@ -74,10 +74,10 @@ class NeoPixelDrawer(DrawerBase):
     def set_empty(self, position):
         self.pixels[position] = (0, 0, 0)
 
-    def Show(self):
+    def show(self):
         self.pixels.show()
 
-    def Clear(self):
+    def clear(self):
         self.pixels.fill((0,0,0))
         self.pixels.show()
 
