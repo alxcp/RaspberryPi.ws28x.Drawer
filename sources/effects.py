@@ -4,125 +4,136 @@ from datetime import timedelta
 import colorsys
 import random
 import math
-from colr import color
 import helpers
 from helpers import *
 
 class PixelEffectsRegistry(object):
-    Effects = []
+    effects = []
 
     def __init__(self):
-        self.Register(RainbowHSVEffect())
-        self.Register(RainbowHSV2Effect())
-        self.Register(StripesEffect())
-        self.Register(BeadsEffect())
-        self.Register(RandomBlinksEffect())
-        self.Register(FullFadeEffect())
-        self.Register(WavesEffect(400, 4000))
-        self.Register(RandomReplacementEffect())
-        self.Register(SwitchColorsEffect())
-        self.Register(DropsEffect())
-        self.Register(FillEffect())
-        self.Register(Thread())
-        self.Register(Thread2())
-        self.Register(Skittles())
+        self.register(RainbowHSVEffect())
+        self.register(RainbowHSV2Effect())
+        self.register(StripesEffect())
+        self.register(BeadsEffect())
+        self.register(RandomBlinksEffect())
+        self.register(FullFadeEffect())
+        self.register(WavesEffect(400, 4000))
+        self.register(RainbowWavesEffect(400, 4000))
+        self.register(RandomReplacementEffect())
+        self.register(DropsEffect())
+        self.register(FillEffect())
 
-    def Register(self, effect):
-        self.Effects.append(effect)
+    def register(self, effect):
+        self.effects.append(effect)
 
-    def PlayEffect(self, drawer, effect, timeout = None):
+    def play_effect(self, drawer, effect, timeout = None):
         if timeout is None:
             timeout = TimeoutInfinite()        
 
         try:
-            effect.Play(drawer, timeout)
+            effect.play(drawer, timeout)
         except KeyboardInterrupt:
-            drawer.Clear()
+            drawer.clear()
 
-    def PlayRandomizedEffect(self, drawer):
+    def play_randomized_effect(self, drawer):
         while True:
-            nextEffectNumber = random.randint(0,len(self.Effects) - 1)
-            nextEffect = self.Effects[nextEffectNumber]
+            next_effect_index = random.randint(0,len(self.effects) - 1)
+            next_effect = self.effects[next_effect_index]
 
             timeout = timedelta(seconds=random.randint(20,120))
 
-            print ("Will run " + str(nextEffect) + " for a " + str(timeout))
+            print ("Will run " + str(next_effect) + " for a " + str(timeout))
 
             try:
-                self.PlayEffect(drawer, nextEffect, Timeout(timeout))
+                self.play_effect(drawer, next_effect, Timeout(timeout))
             except KeyboardInterrupt:
-                drawer.Clear()
+                drawer.clear()
                 return
             except:
                 print ("Exception")
 
-class PixelEffect(object):
-    def Play(self, drawer, timeout):
-        raise NotImplementedError()
+    def demo(self, drawer):
+        next_effect_index = -1
 
+        while True:
+            next_effect_index += 1
+            if next_effect_index >= len(self.effects):
+                next_effect_index = 0
+
+            next_effect = self.effects[next_effect_index]
+
+            timeout = timedelta(seconds=10)
+
+            print ("Will run " + str(next_effect) + " for a " + str(timeout))
+
+            try:
+                self.play_effect(drawer, next_effect, Timeout(timeout))
+            except KeyboardInterrupt:
+                drawer.clear()
+                return
+            except Exception as e:
+                print(e)
 
 class RainbowHSVEffect(PixelEffect):
-    def Play(self, drawer, timeout):
+    def play(self, drawer, timeout):
         translate = 0
         p = 1.0 / (drawer.nLED * 1) * 2
         print(p)
 
-        while not timeout.IsExpired():
-            for z in range(0,drawer.nLED - 1):
+        while not timeout.is_expired():
+            for z in drawer.pixels_indexes:
                 pixel = colorsys.hsv_to_rgb((z + translate) * p, 1, 1)
-                intens = drawer.IntensityMax
-                if random.randint(0,5000) < 5:
+                intens = drawer.intensity_max
+                if random.randint(0, 5000) < 5:
                     intens = 255
 
-                drawer.SetColor(z, ColorRGB(pixel[0] * intens, pixel[1] * intens, pixel[2] * intens))
+                drawer.set_color_raw(z, r = pixel[0] * intens, g = pixel[1] * intens, b = pixel[2] * intens)
 
-            drawer.Show()
+            drawer.show()
             translate = translate + 1
             time.sleep(0.03)
 
 class StripesEffect(PixelEffect):
-    def Play(self, drawer, timeout):
+    def play(self, drawer, timeout):
         nLED = drawer.nLED
-        intensity = drawer.IntensityMax
+        intensity = drawer.intensity_max
 
-        while not timeout.IsExpired():
-            stripeLen = random.randint(0,nLED / 10)
-            stripePos = random.randint(int(stripeLen /2),nLED - int(stripeLen/2))
-            stripeR = random.randint(0,intensity)
-            stripeG = random.randint(0,intensity)
-            stripeB = random.randint(0,intensity)
+        while not timeout.is_expired():
+            stripeLen = random.randint(0, nLED / 10)
+            stripePos = random.randint(int(stripeLen /2), nLED - int(stripeLen/2))
+            stripeR = random.randint(0, intensity)
+            stripeG = random.randint(0, intensity)
+            stripeB = random.randint(0, intensity)
 
             for z in range(0, int(stripeLen / 2)):
-                drawer.SetColor(stripePos + z, ColorRGB(stripeR, stripeG, stripeB))
-                drawer.SetColor(stripePos - z, ColorRGB(stripeR, stripeG, stripeB))
-                drawer.Show()
+                drawer.set_color_raw(stripePos + z, stripeR, stripeG, stripeB)
+                drawer.set_color_raw(stripePos - z, stripeR, stripeG, stripeB)
+                drawer.show()
                 time.sleep(0.2)
-            time.sleep(random.random())
 
 class RainbowHSV2Effect(PixelEffect):
-    def Play(self, drawer, timeout):
+    def play(self, drawer, timeout):
         nLED = drawer.nLED
         translate = 0
-        translateIncr = 1
+        translate_incr = 1
         p = 1.0 / (nLED * 5)
-        intensity = drawer.IntensityMax
+        intensity = drawer.intensity_max
 
-        while not timeout.IsExpired():
+        while not timeout.is_expired():
             for z in range(nLED):
                 pixel = colorsys.hsv_to_rgb((z + translate) * p, 1, 1)
-                drawer.SetColor(z, ColorRGB(pixel[0] * intensity, pixel[1] * intensity, pixel[2] * intensity))
-            drawer.Show()
+                drawer.set_color_raw(z, pixel[0] * intensity, pixel[1] * intensity, pixel[2] * intensity)
+            drawer.show()
 
-            if translate==nLED * 30:
-                translateIncr = -1
+            if translate == nLED * 30:
+                translate_incr = -1
             elif translate == 0:
-                translateIncr = 1
+                translate_incr = 1
 
-            translate = translate + translateIncr
-            #time.sleep(0.03)
+            translate = translate + translate_incr
 
 class BeadsEffect(PixelEffect):
-    def Play(self, drawer, timeout):
+    def play(self, drawer, timeout):
         nLED = drawer.nLED
         translate = 0
         step = 4
@@ -130,390 +141,314 @@ class BeadsEffect(PixelEffect):
         intens = 1.0
         iinc = 0.5
 
-        while not timeout.IsExpired():
-            for z in range(nLED):
+        while not timeout.is_expired():
+            for z in drawer.pixels_indexes:
                 if (z - translate) % step == 0:
-                    pixel = colorsys.hsv_to_rgb((z + translate)*p,1,1)
-                    drawer.SetColor(z, ColorRGB(pixel[0] * intens, pixel[1] * intens, pixel[2] * intens))
+                    pixel = colorsys.hsv_to_rgb((z + translate) * p, 1, 1)
+                    drawer.set_color_raw(z, pixel[0] * intens, pixel[1] * intens, pixel[2] * intens)
                 else:
-                    drawer.SetColor(z, ColorRGB(0,0,0))
+                    drawer.set_color_raw(z, 0,0,0)
             intens=intens+iinc
 
-            if intens>drawer.IntensityMax or intens<1:
-                iinc=iinc*-1
+            if intens > drawer.intensity_max or intens < 1:
+                iinc *= -1
             
-            translate=translate+1
-            drawer.Show()
+            translate += 1
+            drawer.show()
             time.sleep(0.4)
 
 class Blink(object):
-    def __init__(self, position, targetColor, steps = 5):
-        self.Position = position
-        self.Steps = steps
-        self.Step = 0
-        self.TargetColor = targetColor
-        self.IncrR = targetColor.R / steps
-        self.IncrG = targetColor.G / steps
-        self.IncrB = targetColor.B / steps
-        self.CurrentColor = ColorRGB(0,0,0)
-        self.IsFading = False
-        self.IsDone = False
+    def __init__(self, position, target_color, steps = 5):
+        self.position = position
+        self.steps = steps
+        self.step = 0
+        self.target_color = target_color
+        self.incr_r = target_color.r / steps
+        self.incr_g = target_color.g / steps
+        self.incr_b = target_color.b / steps
+        self.current_color = ColorRGB()
+        self.is_fading = False
+        self.is_done = False
 
-    def NextStep(self):
-        if (self.IsFading):
-            self.Step = self.Step - 1
+    def next_step(self):
+        if (self.is_fading):
+            self.step = self.step - 1
         else:
-            self.Step = self.Step + 1
+            self.step = self.step + 1
 
-        if (self.Step == 0):
+        if (self.step == 0):
             return False
 
-        if (self.Step > self.Steps):
-            self.IsFading = True
+        if (self.step > self.steps):
+            self.is_fading = True
 
-        self.CurrentColor = ColorRGB(self.IncrR * (self.Step-1), self.IncrG * (self.Step-1), self.IncrB * (self.Step-1))
+        self.current_color = ColorRGB(self.incr_r * (self.step - 1), self.incr_g * (self.step - 1), self.incr_b * (self.step - 1))
         return True
 
 class RandomBlinksEffect(PixelEffect):
-    def Play(self, drawer, timeout):
+    def play(self, drawer, timeout):
         nLED = drawer.nLED
         blinks = []  
         maxLeds = 10  
-        intensity = drawer.IntensityMax
+        intensity = drawer.intensity_max
 
-        while not timeout.IsExpired():
-            if (len(blinks)<maxLeds):
-                blink = Blink(random.randint(0, nLED - 1),ColorRGB(random.randint(0,intensity), random.randint(0,intensity), random.randint(0, intensity)),10)
+        while not timeout.is_expired():
+            if (len(blinks) < maxLeds):
+                blink = Blink(random.randint(0, nLED - 1), ColorRGB(random.randint(0, intensity), random.randint(0, intensity), random.randint(0, intensity)), 10)
                 blinks.append(blink)
 
-            toRemove = []
+            to_remove = []
 
             for blink in blinks:
-                if (not blink.NextStep()):
-                    toRemove.append(blink)
+                if (not blink.next_step()):
+                    to_remove.append(blink)
             
-            for blink in toRemove:
+            for blink in to_remove:
                 blinks.remove(blink)
 
             for z in range(0, nLED - 1):
-                drawer.SetColor(z, ColorRGB(0,0,0))
+                drawer.set_empty(z)
             
             for blink in blinks:
-                drawer.SetColor(blink.Position, blink.CurrentColor)
+                drawer.set_color(blink.position, blink.current_color)
 
-            drawer.Show()
+            drawer.show()
             time.sleep(0.2)
 
 class ColorBounceEffect(PixelEffect):                         #-m5-BOUNCE COLOR (SINGLE LED)
-    def Play(self, drawer, timeout):    
-        bounceDirection = 0
+    def play(self, drawer, timeout):    
+        bounce_direction = 0
         idex = 0
-        intensity = drawer.IntensityMax
+        intensity = drawer.intensity_max
 
-        while not timeout.IsExpired():
-            if bounceDirection == 0:
+        while not timeout.is_expired():
+            if bounce_direction == 0:
                 idex = idex + 1
                 if idex == drawer.nLED:
-                    bounceDirection = 1
+                    bounce_direction = 1
                     idex = idex - 1
-            if bounceDirection == 1:
+            if bounce_direction == 1:
                 idex = idex - 1
                 if idex == 0:
-                    bounceDirection = 0
+                    bounce_direction = 0
 
             for i in range (0, drawer.nLED - 1):
                 if i == idex:
-                    drawer.SetColor(i, CHSV(drawer.nLED, i, intensity, 1))
+                    drawer.set_color(i, CHSV(drawer.nLED, i, intensity, 1))
                 else:
-                    drawer.SetColor(i, ColorRGB())
+                    drawer.set_empty(i)
 
-            drawer.Show()
+            drawer.show()
             time.sleep(0.1)
 
 class FullFadeEffect(PixelEffect):
-    def Play(self, drawer, timeout):
+    def play(self, drawer, timeout):
         steps = 60
-        currentStep = 0
-        bounceDirection = 1
+        current_step = 0
+        bounce_direction = 1
 
-        while not timeout.IsExpired():
-            if currentStep == steps - 30:
-                bounceDirection = -1
-            elif currentStep == 0:
-                bounceDirection = 1
-                targetColor = getRandomPredefinedColor()
+        while not timeout.is_expired():
+            if current_step == steps - 30:
+                bounce_direction = -1
+            elif current_step == 0:
+                bounce_direction = 1
+                targetColor = ColorRGB.random(2, drawer.intensity_min, drawer.intensity_max)
                     
-                stepR = targetColor.R / float(steps)
-                stepG = targetColor.G / float(steps)
-                stepB = targetColor.B / float(steps)
+                stepR = targetColor.r / float(steps)
+                stepG = targetColor.g / float(steps)
+                stepB = targetColor.b / float(steps)
 
+            current_step += bounce_direction
+            currentColor = ColorRGB(stepR * current_step, stepG * current_step, stepB * current_step)
 
-            currentStep = currentStep + bounceDirection
-            currentColor = ColorRGB(stepR * currentStep, stepG * currentStep, stepB * currentStep)
+            for z in range(0, drawer.nLED - 1):
+                drawer.set_color(z, currentColor)
 
-            for z in range(0, drawer.nLED -1):
-                drawer.SetColor(z, currentColor)
-            drawer.Show()
+            drawer.show()
             time.sleep(0.1)
 
 class WavesEffect(PixelEffect):
     def __init__(self, steps, cycles):
-        self.Steps = steps
-        self.Cycles = cycles
+        self.steps = steps
+        self.cycles = cycles
 
-    def Play(self, drawer, timeout):
-        currentStep = 0
-        currentCycle = 0
-        intensityMin = drawer.IntensityMin
-        intensityMax = drawer.IntensityMax
-        targetColor = getRandomColor(2,intensityMin,intensityMax)
-        transitionCycle = -1
-        cycles = self.Cycles
+    def play(self, drawer, timeout):
+        current_step = 0
+        current_cycle = 0
+        intensity_min = drawer.intensity_min
+        intensity_max = drawer.intensity_max
+        target_color = ColorRGB.random(2, intensity_min, intensity_max)
+        transition_cycle = -1
 
-        while not timeout.IsExpired():
-            if currentCycle >= self.Cycles:
-                if currentCycle == self.Cycles:
-                    targetTransitionColor = getRandomColor(2,intensityMin,intensityMax)
+        while not timeout.is_expired():
+            if current_cycle >= self.cycles:
+                if current_cycle == self.cycles:
+                    target_transition_color = ColorRGB.random(2, intensity_min, intensity_max)
 
-                transitionCycle = currentCycle - self.Cycles
+                transition_cycle = current_cycle - self.cycles
                 
-                if transitionCycle == drawer.nLED:
-                    transitionCycle = -1
-                    targetColor = targetTransitionColor                
-                    currentCycle = 0
+                if transition_cycle == drawer.nLED:
+                    transition_cycle = -1
+                    target_color = target_transition_color                
+                    current_cycle = 0
 
-            currentCycle = currentCycle + 1
-            currentStep = currentStep + 1
+            current_cycle += 1
+            current_step += 1
 
-            for z in range(0, drawer.nLED -1):
-                m = abs(math.sin((z + currentStep) / self.Steps))
+            for z in drawer.pixels_indexes:
+                m = abs(math.sin((z + current_step) / self.steps))
                 
-                if z <= transitionCycle:                
-                    c = targetTransitionColor
+                if z <= transition_cycle:                
+                    c = target_transition_color
                 else:
-                    c = targetColor
+                    c = target_color
 
                 mC = c.multiply(m)
                     
-                if mC.R == 0 and c.R > 0:
-                    mC.R = 1
-                if mC.G == 0 and c.G > 0:
-                    mC.G = 1
-                if mC.B == 0 and c.B > 0:
-                    mC.B = 1
-                drawer.SetColor(z, mC)
+                if mC.r == 0 and c.r > 0:
+                    mC.r = 1
+                if mC.g == 0 and c.g > 0:
+                    mC.g = 1
+                if mC.b == 0 and c.b > 0:
+                    mC.b = 1
+                drawer.set_color(z, mC)
                 
-            drawer.Show()
+            drawer.show()
 
 class RainbowWavesEffect(PixelEffect):
     def __init__(self, steps, cycles):
-        self.Steps = steps
-        self.Cycles = cycles
+        self.steps = steps
+        self.cycles = cycles
 
-    def Play(self, drawer, timeout):
-        currentStep = 0
-        currentCycle = 0
-        #intensityMin = drawer.IntensityMin
-        intensityMax = drawer.IntensityMax
-        #targetColor = getRandomColor(2,intensityMin,intensityMax)
-        transitionCycle = -1
-        #cycles = self.Cycles
-
-        #translate = 0
-        #translateIncr = 1
+    def play(self, drawer, timeout):
+        current_step = 0
+        current_cycle = 0
+        transition_cycle = -1
         p = 1.0 / (drawer.nLED * 5)
         
-        while not timeout.IsExpired():
-            if currentCycle >= self.Cycles:
-                transitionCycle = transitionCycle + 1                
-                if currentCycle - self.Cycles == drawer.nLED:
-                    currentCycle = 0
+        while not timeout.is_expired():
+            if current_cycle >= self.cycles:
+                transition_cycle += 1                
+                if current_cycle - self.cycles == drawer.nLED:
+                    current_cycle = 0
 
-            currentCycle = currentCycle + 1
-            currentStep = currentStep + 1
+            current_cycle += 1
+            current_step += 1
 
             for z in range(0, drawer.nLED -1):
-                pixel = colorsys.hsv_to_rgb((z + transitionCycle) * p, 1, 1)
+                pixel = colorsys.hsv_to_rgb((z + transition_cycle) * p, 1, 1)
 
-                m = abs(math.sin((z + currentStep) / self.Steps))                
-                c = ColorRGB(pixel[0] * intensityMax, pixel[1] * intensityMax, pixel[2] * intensityMax)
+                m = abs(math.sin((z + current_step) / self.steps))                
+                c = ColorRGB(pixel[0] * drawer.intensity_max, pixel[1] * drawer.intensity_max, pixel[2] * drawer.intensity_max)
                 mC = c.multiply(m, True)
-                drawer.SetColor(z, mC)
+                drawer.set_color(z, mC)
                 
-            drawer.Show()
+            drawer.show()
 
 class RandomReplacementEffect(PixelEffect):
-    def Play(self, drawer, timeout):
+    def play(self, drawer, timeout):
         steps = 60
-        currentStep = 0
+        current_step = 0
 
-        while not timeout.IsExpired():
-            targetColor = getRandomPredefinedColor()
+        while not timeout.is_expired():
+            target_color = ColorRGB.random(2, drawer.intensity_min, drawer.intensity_max)
                     
-            stepR = targetColor.R / float(steps)
-            stepG = targetColor.G / float(steps)
-            stepB = targetColor.B / float(steps)
+            step_r = target_color.r / float(steps)
+            step_g = target_color.g / float(steps)
+            step_b = target_color.b / float(steps)
 
             order = []
-            for z in range(0, drawer.nLED - 1):
+            for z in drawer.pixels_indexes:
                 order.append(z)
             
             random.shuffle(order)        
 
-            currentStep = 7
-            currentColor = ColorRGB(stepR * currentStep, stepG * currentStep, stepB * currentStep)
+            current_step = 7
+            current_color = ColorRGB(step_r * current_step, step_g * current_step, step_b * current_step)
 
             for z in order:
-                drawer.SetColor(z, currentColor)
-                drawer.Show()
-
-class SwitchColorsEffect(PixelEffect):
-    def Play(self, drawer, timeout):
-        firstColor = ColorRGB(255,153,51).multiply(0.1)
-        secondColor = ColorRGB(102, 153, 255).multiply(0.1)
-        step = 0
-
-        while not timeout.IsExpired():
-            if step == 1:
-                step = 2
-            else:
-                step = 1
-
-            for ln in range(0,drawer.nLED-1,3):
-                if step == 1:
-                    drawer.SetColor(ln, firstColor)
-                    drawer.SetColor(ln+1,secondColor)
-                    drawer.SetColor(ln+2,secondColor)
-                else:
-                    drawer.SetColor(ln, secondColor)
-                    drawer.SetColor(ln+1, firstColor)
-                    drawer.SetColor(ln+2, firstColor)
-            drawer.Show()
-            time.sleep(1)
+                drawer.set_color(z, current_color)
+                drawer.show()
 
 class DropsEffect(PixelEffect):
-    def Play(self, drawer, timeout):
-        tailLen = 10
-        dropsDistance = 10
+    def play(self, drawer, timeout):
+        tail_len = 10
+        drops_distance = 10
         drops = []
 
-        while not timeout.IsExpired():
-            dropsCount = len(drops)
-            if dropsCount == 0:
-                drops.append([0, getRandomPredefinedColor().multiply(0.9)])
-            elif drops[dropsCount - 1][0] == tailLen + dropsDistance:
-                drops.append([0, getRandomPredefinedColor().multiply(0.9)])
+        while not timeout.is_expired():
+            drops_count = len(drops)
+            if drops_count == 0:
+                drops.append([0, ColorRGB.random(2, drawer.intensity_min, drawer.intensity_max)])
+            elif drops[drops_count - 1][0] == tail_len + drops_distance:
+                drops.append([0, ColorRGB.random(2, drawer.intensity_min, drawer.intensity_max)])
             
-            deleteFirst = False
+            delete_first = False
 
             for drop in drops:
                 drop[0] = drop[0]+1
-                if drop[0] == drawer.nLED + tailLen:
-                    deleteFirst = True
+                if drop[0] == drawer.nLED + tail_len:
+                    delete_first = True
                 else:
-                    faid = tailLen
-                    for z in range(drop[0] - tailLen - 1 - dropsDistance, drop[0]):
+                    faid = tail_len
+                    for z in range(drop[0] - tail_len - 1 - drops_distance, drop[0]):
                         if z > 0 and z < drawer.nLED - 1:
                             if faid <= 0:
                                 pixel = ColorRGB()
                             else:
-                                pixel = drop[1].multiply(1/float(faid))
-
-                            #print (str(z) + ": " + str(pixel.R) + " " + str(pixel.G) + " " + str(pixel.B))
+                                pixel = drop[1].multiply(1 / float(faid))
                             
-                            drawer.SetColor(z, pixel)
+                            drawer.set_color(z, pixel)
                             faid = faid - 1
             
-            if deleteFirst:
+            if delete_first:
                 drops.remove(drops[0])
 
-            drawer.Show()
+            drawer.show()
             time.sleep(0.1)
 
 class FillEffect(PixelEffect):
-    def Play(self, drawer, timeout):
+    def play(self, drawer, timeout):
         step = 0
-        while not timeout.IsExpired():
+        while not timeout.is_expired():
             if step == 0:
-                for z in range(0,255-1):
-                    drawer.SetColor(z, ColorRGB(z,0,0))
-                drawer.Show()
+                for z in range(0, 255 - 1):
+                    drawer.set_color(z, ColorRGB(z, 0, 0))
+                drawer.show()
                 step = 1
             elif step == 1:
-                for z in range(0,255-1):
-                    drawer.SetColor(z, ColorRGB(0,z,0))
-                drawer.Show()
+                for z in range(0, 255 - 1):
+                    drawer.set_color(z, ColorRGB(0, z, 0))
+                drawer.show()
                 step = 2
             elif step == 2:
-                for z in range(0,255-1):
-                    drawer.SetColor(z, ColorRGB(0,0,z))
-                drawer.Show()
+                for z in range(0, 255 - 1):
+                    drawer.set_color(z, ColorRGB(0, 0, z))
+                drawer.show()
                 step = 0
             time.sleep(10)
 
-class Thread(PixelEffect):
-    def Play(self, drawer, timeout):    
-        for lastNumber in range(drawer.nLED - 1, 0, -1):
-            ledColor = getRandomColor(2,3,20)
-            if timeout.IsExpired:
+class ThreadEffect(PixelEffect):
+    def play(self, drawer, timeout):    
+        for last_number in range(drawer.nLED - 1, 0, -1):
+            ledColor = ColorRGB.random(2, 3, 20)
+            if timeout.is_expired:
                 return
-            for ledNumber in range(1,lastNumber):
-                drawer.SetColor(ledNumber,ledColor)
-                drawer.SetColor(ledNumber-1,ColorRGB())
-                drawer.Show()
+            for led_number in range(1, last_number):
+                drawer.set_color(led_number, ledColor)
+                drawer.set_empty(led_number - 1)
+                drawer.show()
 
-class Thread2(PixelEffect):
-    def Play(self, drawer, timeout):
-        nCL=int(drawer.nLED/2)
-        for lastNumber in range(1,nCL- 1):
-            ledColor = getRandomColor(2,3,20)
-            if timeout.IsExpired:
+class Thread2Effect(PixelEffect):
+    def play(self, drawer, timeout):
+        nCL = int(drawer.nLED / 2)
+        for last_number in range(1, nCL - 1):
+            ledColor = ColorRGB.random(2, 3, 20)
+            if timeout.is_expired:
                 return
-            for ledNumber in range(1,nCL - lastNumber):            
-                drawer.SetColor(nCL-ledNumber,ledColor)
-                drawer.SetColor(nCL-ledNumber+1,ColorRGB())
-                drawer.SetColor(nCL+ledNumber,ledColor)
-                drawer.SetColor(nCL+ledNumber-1,ColorRGB())
-                drawer.Show()
-            
-            
-class Skittles(PixelEffect):
-    def Play(self, drawer, timeout):    
-        while not timeout.IsExpired():
-            for z in range(0,drawer.nLED-1):
-                drawer.SetColor(z, getRandomColor(2,3,20))
-            drawer.Show()
-            time.sleep(3)
-
-class ColorRunaway(PixelEffect):
-    def Play(self, drawer, timeout):    
-        while not timeout.IsExpired():
-            ps = random.randint(0, drawer.nLED-1)
-            pl = pr = ps
-            color = getRandomColor(2, drawer.IntensityMin, drawer.IntensityMax)
-            speed = 0
-            drawer.SetColor(ps, color)
-            drawer.Show()
-            while True:
-                speed += 1
-                pl -= speed
-                pr += speed
-
-                if pl < 0 or pr > drawer.nLED - 1:
-                    #print ("Brake")
-                    break
-
-                for p in range(pl,pr):
-                    drawer.SetColor(p,color)
-                
-                drawer.Show()
-                time.sleep(0.1)
-
-
-
-                #print ("pl: " + str(pl) + ", pr: " + str(pr))
-                #time.sleep(1)
-
-
-
-
+            for led_number in range(1,nCL - last_number):            
+                drawer.set_color(nCL - led_number, ledColor)
+                drawer.set_empty(nCL - led_number + 1)
+                drawer.set_color(nCL + led_number, ledColor)
+                drawer.set_empty(nCL + led_number - 1)
+                drawer.show()
