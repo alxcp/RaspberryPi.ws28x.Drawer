@@ -42,7 +42,7 @@ class PixelEffectsRegistry(object):
 
             timeout = timedelta(seconds=random.randint(20,120))
 
-            print ("Will run " + str(next_effect) + " for a " + str(timeout))
+            print ("\rWill run " + str(next_effect) + " for a " + str(timeout) + "\r")
 
             try:
                 self.play_effect(drawer, next_effect, Timeout(timeout))
@@ -64,7 +64,7 @@ class PixelEffectsRegistry(object):
 
             timeout = timedelta(seconds=10)
 
-            print ("Will run " + str(next_effect) + " for a " + str(timeout))
+            print ("\rWill run " + str(next_effect) + " for a " + str(timeout) + "\r")
 
             try:
                 self.play_effect(drawer, next_effect, Timeout(timeout))
@@ -120,7 +120,7 @@ class RainbowHSV2Effect(PixelEffect):
         intensity = drawer.intensity_max
 
         while not timeout.is_expired():
-            for z in range(nLED):
+            for z in drawer.pixels_indexes:
                 pixel = colorsys.hsv_to_rgb((z + translate) * p, 1, 1)
                 drawer.set_color_raw(z, pixel[0] * intensity, pixel[1] * intensity, pixel[2] * intensity)
             drawer.show()

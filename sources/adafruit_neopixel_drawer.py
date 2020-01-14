@@ -50,7 +50,7 @@ class NeoPixelDrawer(DrawerBase):
     def __init__(self, nLED):
         self.pixels = neopixel.NeoPixel(board.D18,nLED,auto_write=False)
         self.nLED = nLED
-        self.Clear()
+        self.clear()
         self.pixels_indexes = range(0, nLED - 1)
 
     def set_color(self, position, color, calibrate = None):

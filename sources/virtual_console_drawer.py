@@ -3,11 +3,10 @@ import colorsys
 import random
 from colr import color
 import effects
-from effects import *
 import effects_experimental
-from effects_experimental import *
 import helpers
-from helpers import *
+from helpers import ColorRGB
+from helpers import DrawerBase
 
 class ConsoleDrawer(DrawerBase):
     calibration_table = [
@@ -50,11 +49,9 @@ class ConsoleDrawer(DrawerBase):
     intensity_max = 255
 
     def __init__(self, nLED):
-        self.pixels = []
-        for z in range(0, nLED):
-            self.pixels.append(ColorRGB())
-        self.nLED = nLED
+        self.pixels = [ColorRGB] * (nLED - 1)
         self.pixels_indexes = range(0, nLED - 1)
+        self.nLED = nLED
 
     def set_color(self, position, color, calibrate = None):
         if calibrate is None:
@@ -93,8 +90,8 @@ class ConsoleDrawer(DrawerBase):
 
 drawer = ConsoleDrawer(150)
 
-e = RainbowWavesEffect(50, 6000)
-effects = PixelEffectsRegistry()
+e = effects.RainbowWavesEffect(50, 6000)
+effects = effects.PixelEffectsRegistry()
 effects.demo(drawer)
 #effects.play_effect(drawer, e)
 #effects.play_randomized_effect(drawer)
