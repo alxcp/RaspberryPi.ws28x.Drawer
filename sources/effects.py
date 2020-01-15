@@ -45,7 +45,7 @@ class PixelEffectsRegistry(object):
 
             timeout = timedelta(seconds = random.randint(20, 120))
 
-            print (f"\rWill run {next_effect} for a {timeout}\r")
+            print (f"\r\nWill run {next_effect} for a {timeout}")
 
             try:
                 self.play_effect(drawer, next_effect, Timeout(timeout))
@@ -67,7 +67,7 @@ class PixelEffectsRegistry(object):
 
             timeout = timedelta(seconds = 10)
 
-            print (f"\rWill run {next_effect} for a {timeout}\r")
+            print (f"\r\nWill run {next_effect} for a {timeout}")
 
             try:
                 self.play_effect(drawer, next_effect, Timeout(timeout))

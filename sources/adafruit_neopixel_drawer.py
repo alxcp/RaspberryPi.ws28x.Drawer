@@ -5,7 +5,13 @@ import colorsys
 import random
 import os,sys
 import effects
-from effects import *
+import effects_experimental
+import helpers
+from helpers import ColorRGB
+from helpers import DrawerBase
+from helpers import Timeout
+from datetime import timedelta
+
 
 class NeoPixelDrawer(DrawerBase):
     calibration_table = [
@@ -77,6 +83,13 @@ class NeoPixelDrawer(DrawerBase):
     def show(self):
         self.pixels.show()
 
+        if self.recording:
+            frame = [] * self.nLED
+            for pixel_index in self.pixels_indexes:
+                frame.append(self.pixels[pixel_index])
+
+            self.frames.append(frame)        
+
     def clear(self):
         self.pixels.fill((0,0,0))
         self.pixels.show()
@@ -84,6 +97,15 @@ class NeoPixelDrawer(DrawerBase):
     def calibrate_color(self, color):
         return ColorRGB(self.calibration_table[color.r], self.calibration_table[color.g], self.calibration_table[color.b])
 
+    def show_frame(self, frame):
+        for pixel_index in self.pixels_indexes:
+            self.pixels[pixel_index] = frame[pixel_index]
+        self.show()
+
+    def replay(self, timeout):
+        while not timeout.is_expired():
+            for frame in self.frames:
+                self.show_frame(frame)     
 
 drawer = NeoPixelDrawer(300)
 
@@ -98,7 +120,7 @@ drawer = NeoPixelDrawer(300)
 #e = pixelsEffects.switchColors
 #run_effect(e,300,8)
 #pixelsEffects.runWithDrawer(drawer, waves)
-effects = PixelEffectsRegistry()
-effects.play_effect(drawer, RainbowHSV2Effect())
+pixelEffects = effects.PixelEffectsRegistry()
+pixelEffects.play_effect(drawer, effects.RainbowHSV2Effect())
 #effects.play_randomized_effect(drawer)
 

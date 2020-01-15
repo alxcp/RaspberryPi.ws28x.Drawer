@@ -11,14 +11,26 @@ class PixelEffect(object):
     def play(self, drawer, timeout):
         raise NotImplementedError()
 
-
 class DrawerBase(object):
     calibration_table = [range(0, 255)]
     nLED = 0
 
+    frames = []
+    recording = False
+
     def __init__(self, nLED):
         self.nLED = nLED
         self.pixels_indexes = range(0, nLED - 1)
+
+    def begin_record(self):
+        self.recording = True
+
+    def stop_record(self):
+        self.recording = False
+    
+    def replay(self, timeout):
+        raise NotImplementedError()
+
 
     def set_color(self, position, color, calibrate=None):
         raise NotImplementedError()
@@ -36,6 +48,9 @@ class DrawerBase(object):
         raise NotImplementedError()
 
     def calibrate_color(self, color):
+        raise NotImplementedError()
+
+    def show_frame(self, frame):
         raise NotImplementedError()
 
 

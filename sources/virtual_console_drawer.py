@@ -7,7 +7,8 @@ import effects_experimental
 import helpers
 from helpers import ColorRGB
 from helpers import DrawerBase
-
+from helpers import Timeout
+from datetime import timedelta
 
 class ConsoleDrawer(DrawerBase):
     calibration_table = [
@@ -90,6 +91,9 @@ class ConsoleDrawer(DrawerBase):
 
         print(f'\r{row}', end='\r')
 
+        if self.recording:
+            self.frames.append(self.pixels.copy())
+
     def clear(self):
         for position in self.pixels_indexes:
             self.set_empty(position)
@@ -100,11 +104,25 @@ class ConsoleDrawer(DrawerBase):
             self.calibration_table[color.g], 
             self.calibration_table[color.b])
 
+    def show_frame(self, frame):
+        self.pixels = frame
+        self.show()
+
+    def replay(self, timeout):
+        while not timeout.is_expired():
+            for frame in self.frames:
+                self.show_frame(frame)        
 
 drawer = ConsoleDrawer(150)
 
 #e = effects.RainbowWavesEffect(50, 6000)
 effectsRegistry = effects.PixelEffectsRegistry()
 #effectsRegistry.demo(drawer)
-effectsRegistry.play_effect(drawer, effects.RandomReplacementEffect())
+drawer.begin_record()
+effectsRegistry.play_effect(drawer, effects.WavesEffect(40, 100), Timeout(timedelta(seconds = 20)))
+drawer.stop_record()
+print ("Replay")
+drawer.replay(Timeout(timedelta(seconds=40)))
+
+
 #effectsRegistry.play_randomized_effect(drawer)
