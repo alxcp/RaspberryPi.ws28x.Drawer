@@ -1,58 +1,10 @@
-import time
+from drawers.base import DrawerBase
 from datetime import datetime
 from datetime import timedelta
 import colorsys
 import random
 import math
 from colr import color
-
-
-class PixelEffect(object):
-    def play(self, drawer, timeout):
-        raise NotImplementedError()
-
-class DrawerBase(object):
-    calibration_table = [range(0, 255)]
-    nLED = 0
-
-    frames = []
-    recording = False
-
-    def __init__(self, nLED):
-        self.nLED = nLED
-        self.pixels_indexes = range(0, nLED - 1)
-
-    def begin_record(self):
-        self.recording = True
-
-    def stop_record(self):
-        self.recording = False
-    
-    def replay(self, timeout):
-        raise NotImplementedError()
-
-
-    def set_color(self, position, color, calibrate=None):
-        raise NotImplementedError()
-
-    def set_color_raw(self, position, r, g, b, calibrate=None):
-        raise NotImplementedError()
-
-    def set_empty(self, position):
-        raise NotImplementedError()
-
-    def show(self):
-        raise NotImplementedError()
-
-    def clear(self):
-        raise NotImplementedError()
-
-    def calibrate_color(self, color):
-        raise NotImplementedError()
-
-    def show_frame(self, frame):
-        raise NotImplementedError()
-
 
 class ColorRGB(object):
     r = 0
@@ -89,6 +41,24 @@ class ColorRGB(object):
 
     def to_string(self):
         return f"({self.r}, {self.g}, {self.b})"
+    
+    def convert(self, target, progress):
+        if progress < 0 or progress > 1:
+            raise ArgumentOutOfRangeException()
+        
+        rc = self.r - int((self.r - target.r) * progress)
+        gc = self.g - int((self.g - target.g) * progress)
+        bc = self.b - int((self.b - target.b) * progress)
+        
+        result = ColorRGB(rc, gc, bc)
+        
+        if rc > 255 or gc > 255 or bc > 255:
+            print(result.to_string())
+            print(self.to_string())
+            print(target.to_string())
+            print(progress)
+        
+        return result
 
     @staticmethod
     def random(channels_max=3, intensity_min=0, intensity_max=255):
@@ -124,16 +94,3 @@ class ColorRGB(object):
             pixel[0] * saturation, 
             pixel[1] * saturation, 
             pixel[2] * saturation)
-
-
-class Timeout(object):
-    def __init__(self, delta):
-        self.EndTime = datetime.now() + delta
-
-    def is_expired(self):
-        return datetime.now() > self.EndTime
-
-
-class TimeoutInfinite(object):
-    def is_expired(self):
-        return False

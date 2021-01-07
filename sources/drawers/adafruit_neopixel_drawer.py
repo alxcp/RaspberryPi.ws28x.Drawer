@@ -4,14 +4,12 @@ import time
 import colorsys
 import random
 import os,sys
-import effects
-import effects_experimental
-import helpers
-from helpers import ColorRGB
-from helpers import DrawerBase
-from helpers import Timeout
-from datetime import timedelta
 
+from helpers.color_rgb import ColorRGB
+from helpers.timeouts import Timeout
+
+from drawers.base import DrawerBase
+from datetime import timedelta
 
 class NeoPixelDrawer(DrawerBase):
     calibration_table = [
@@ -49,7 +47,7 @@ class NeoPixelDrawer(DrawerBase):
         236, 239, 241, 244, 247, 249, 252, 255
         ]
 
-    calibrate = True
+    calibrate = False
     intensity_min = 1
     intensity_max = 100
 
@@ -90,9 +88,10 @@ class NeoPixelDrawer(DrawerBase):
 
             self.frames.append(frame)        
 
-    def clear(self):
+    def clear(self, show = True):
         self.pixels.fill((0,0,0))
-        self.pixels.show()
+        if show:
+            self.pixels.show()
 
     def calibrate_color(self, color):
         return ColorRGB(self.calibration_table[color.r], self.calibration_table[color.g], self.calibration_table[color.b])
@@ -107,20 +106,4 @@ class NeoPixelDrawer(DrawerBase):
             for frame in self.frames:
                 self.show_frame(frame)     
 
-drawer = NeoPixelDrawer(300)
-
-#rainbow_hsv(200)
-#e = rainbow_hsv
-#e = pixelsEffects.rainbow_hsv2
-#e = stripes
-#e = rings
-#e = boom
-#e = pixelsEffects.fullFade
-#e = pixelsEffects.randomReplacement
-#e = pixelsEffects.switchColors
-#run_effect(e,300,8)
-#pixelsEffects.runWithDrawer(drawer, waves)
-pixelEffects = effects.PixelEffectsRegistry()
-pixelEffects.play_effect(drawer, effects.RainbowHSV2Effect())
-#effects.play_randomized_effect(drawer)
 
