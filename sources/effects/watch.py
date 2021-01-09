@@ -1,7 +1,5 @@
 from datetime import datetime
-
 from effects.base import MatrixPixelEffect
-
 from helpers.color_rgb import ColorRGB
 
 

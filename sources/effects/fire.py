@@ -17,16 +17,16 @@ class FireEffect(MatrixPixelEffect):
             if random.randint(0, 1000) > 885:
                 self.sparks.append(Spark(x))
 
-        for s in self.sparks:
-            self.process_spark(s)
+        for spark in self.sparks:
+            spark.process()
 
         to_remove = []
 
-        for s in self.sparks:
-            if s.altitude >= self.height:
-                to_remove.append(s)
+        for spark in self.sparks:
+            if spark.altitude >= self.height:
+                to_remove.append(spark)
             else:
-                self.draw_spark(s)
+                self.draw_spark(spark)
 
         for x in range(self.width):
             position = super(FireEffect, self).translate_to_matrix_columns(x, self.height - 1)
@@ -37,10 +37,6 @@ class FireEffect(MatrixPixelEffect):
             self.sparks.remove(r)
 
         self.drawer.show()
-
-    def process_spark(self, spark):
-        t = datetime.now() - spark.was_born
-        spark.altitude = spark.altitude + spark.speed
 
     def draw_spark(self, spark):
         for y in range(0, int(spark.altitude)):
@@ -57,3 +53,8 @@ class Spark(object):
         self.heat = 255
         self.color = ColorRGB(255, 0, 0)
         self.speed = random.randint(0, 10) / 10
+
+    def process(self):
+        t = datetime.now() - self.was_born
+        self.altitude = self.altitude + self.speed
+

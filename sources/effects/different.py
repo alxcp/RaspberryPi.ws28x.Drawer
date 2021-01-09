@@ -33,20 +33,18 @@ class RainbowHSVEffect(PixelEffect):
 class RainbowHSV2Effect(PixelEffect):
     def __init__(self, drawer, frame_delay=0):
         PixelEffect.__init__(self, drawer, frame_delay)
-        self.n_led = drawer.n_led
         self.translate = 0
         self.translate_incr = 1
-        self.p = 1.0 / (self.n_led * 5)
-        self.intensity = drawer.intensity_max
+        self.p = 1.0 / (self.drawer.n_led * 5)
 
     def play_frame(self):
         for z in self.drawer.pixels_indexes:
             pixel = colorsys.hsv_to_rgb((z + self.translate) * self.p, 1, 1)
             self.drawer.set_color_raw(
                 z,
-                pixel[0] * self.intensity,
-                pixel[1] * self.intensity,
-                pixel[2] * self.intensity)
+                pixel[0] * self.drawer.intensity_max,
+                pixel[1] * self.drawer.intensity_max,
+                pixel[2] * self.drawer.intensity_max)
 
         self.drawer.show()
 
@@ -65,13 +63,11 @@ class BeadsEffect(PixelEffect):
         self.step = 4
         self.wave_step = 0
 
-        self.n_led = drawer.n_led
         self.p = 1.0 / (drawer.n_led * 1) * 2
-        self.intensity = drawer.intensity_max
         self.total_wave_steps = drawer.intensity_max
 
     def play_frame(self):
-        m = self.intensity * abs(math.sin(self.wave_step / self.total_wave_steps))
+        m = self.drawer.intensity_max * abs(math.sin(self.wave_step / self.total_wave_steps))
 
         for z in self.drawer.pixels_indexes:
             if (z - self.translate) % self.step == 0:
@@ -90,18 +86,16 @@ class RandomBlinksEffect(PixelEffect):
     def __init__(self, drawer, frame_delay=0):
         PixelEffect.__init__(self, drawer, frame_delay)
         self.blinks = []
-        self.maxLeds = 10
-        self.n_led = drawer.n_led
-        self.intensity = drawer.intensity_max
+        self.max_leds = 10
 
     def play_frame(self):
-        if len(self.blinks) < self.maxLeds:
+        if len(self.blinks) < self.max_leds:
             blink_color = ColorRGB(
-                random.randint(0, self.intensity),
-                random.randint(0, self.intensity),
-                random.randint(0, self.intensity))
+                random.randint(0, self.drawer.intensity_max),
+                random.randint(0, self.drawer.intensity_max),
+                random.randint(0, self.drawer.intensity_max))
 
-            blink = Blink(random.randint(0, self.n_led - 1), blink_color, 10)
+            blink = Blink(random.randint(0, self.drawer.n_led - 1), blink_color, 10)
             self.blinks.append(blink)
 
         to_remove = []
@@ -113,7 +107,7 @@ class RandomBlinksEffect(PixelEffect):
         for blink in to_remove:
             self.blinks.remove(blink)
 
-        for z in range(0, self.n_led - 1):
+        for z in range(0, self.drawer.n_led - 1):
             self.drawer.set_empty(z)
 
         for blink in self.blinks:
@@ -191,15 +185,13 @@ class WavesEffect(PixelEffect):
         self.current_step = 0
         self.current_cycle = 0
         self.transition_cycle = -1
-        self.intensity_min = drawer.intensity_min
-        self.intensity_max = drawer.intensity_max
-        self.target_color = ColorRGB.random(2, self.intensity_min, self.intensity_max)
-        self.target_transition_color = ColorRGB.random(2, self.intensity_min, self.intensity_max)
+        self.target_color = ColorRGB.random(2, drawer.intensity_min, drawer.intensity_max)
+        self.target_transition_color = ColorRGB.random(2, drawer.intensity_min, drawer.intensity_max)
 
     def play_frame(self):
         if self.current_cycle >= self.cycles:
             if self.current_cycle == self.cycles:
-                self.target_transition_color = ColorRGB.random(2, self.intensity_min, self.intensity_max)
+                self.target_transition_color = ColorRGB.random(2, self.drawer.intensity_min, self.drawer.intensity_max)
 
             self.transition_cycle = self.current_cycle - self.cycles
 
@@ -235,7 +227,6 @@ class RainbowWavesEffect(PixelEffect):
         self.current_cycle = 0
         self.transition_cycle = 0
         self.p = 1.0 / (drawer.n_led * 5)
-        self.intensity_max = drawer.intensity_max
 
     def play_frame(self):
         if self.current_cycle >= self.cycles:
@@ -251,9 +242,9 @@ class RainbowWavesEffect(PixelEffect):
 
             m = abs(math.sin((z + self.current_step) / self.steps))
             c = ColorRGB(
-                pixel[0] * self.intensity_max,
-                pixel[1] * self.intensity_max,
-                pixel[2] * self.intensity_max)
+                pixel[0] * self.drawer.intensity_max,
+                pixel[1] * self.drawer.intensity_max,
+                pixel[2] * self.drawer.intensity_max)
             m_c = c.multiply(m, True)
             self.drawer.set_color(z, m_c)
 

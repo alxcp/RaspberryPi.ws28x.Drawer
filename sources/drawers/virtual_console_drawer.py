@@ -11,9 +11,9 @@ class ConsoleDrawer(DrawerBase):
     intensity_max = 255
 
     def __init__(self, n_led):
+        super().__init__(n_led)
         self.pixels = [ColorRGB(0, 0, 0)] * n_led
         self.pixels_indexes = range(0, n_led)
-        self.n_led = n_led
 
     def set_color(self, position, target_color, calibrate=None):
         if calibrate is None:

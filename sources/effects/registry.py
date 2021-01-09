@@ -1,12 +1,12 @@
-from datetime import timedelta
 import random
+from datetime import timedelta
 
-import effects.different
-import effects.watch
-import effects.fire
-import effects.meteor_rain
+import sys
+import traceback
 
-import sys, traceback
+from effects import different
+from effects.fire import FireEffect
+from effects.meteor_rain import MeteorRainEffect
 from helpers.timeouts import Timeout
 from helpers.timeouts import TimeoutInfinite
 
@@ -18,15 +18,15 @@ class PixelEffectsRegistry(object):
 
     def __init__(self, drawer):
         self.drawer = drawer
-        self.register(effects.different.RainbowHSVEffect(drawer))
-        self.register(effects.different.RainbowHSV2Effect(drawer))
-        self.register(effects.different.BeadsEffect(drawer))
-        self.register(effects.different.RandomBlinksEffect(drawer))
-        self.register(effects.different.WavesEffect(drawer, 400, 4000))
-        self.register(effects.different.RainbowWavesEffect(drawer, 400, 4000))
-        self.register(effects.different.DropsEffect(drawer))
-        self.register(effects.meteor_rain.MeteorRainEffect(drawer))
-        self.register(effects.fire.FireEffect(drawer, 32, 8, 0))
+        self.register(different.RainbowHSVEffect(drawer))
+        self.register(different.RainbowHSV2Effect(drawer))
+        self.register(different.BeadsEffect(drawer))
+        self.register(different.RandomBlinksEffect(drawer))
+        self.register(different.WavesEffect(drawer, 400, 4000))
+        self.register(different.RainbowWavesEffect(drawer, 400, 4000))
+        self.register(different.DropsEffect(drawer))
+        self.register(MeteorRainEffect(drawer))
+        self.register(FireEffect(drawer, 32, 8, 0))
 
     def register(self, effect):
         self.effects.append(effect)
