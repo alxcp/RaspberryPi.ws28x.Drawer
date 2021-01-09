@@ -1,4 +1,4 @@
-
+from datetime import datetime
 
 
 class Timeout(object):
@@ -9,6 +9,9 @@ class Timeout(object):
         return datetime.now() > self.EndTime
 
 
-class TimeoutInfinite(object):
+class TimeoutInfinite(Timeout):
+    def __init__(self):
+        super().__init__(datetime.now() - datetime.now())
+
     def is_expired(self):
         return False

@@ -18,7 +18,7 @@ class SkittlesEffect(PixelEffect):
 class ColorRunawayEffect(PixelEffect):
     def play(self, drawer, timeout):    
         while not timeout.is_expired():
-            ps = random.randint(0, drawer.nLED - 1)
+            ps = random.randint(0, drawer.n_led - 1)
             pl = pr = ps
             color = ColorRGB.random(2, drawer.intensity_min, drawer.intensity_max)
             speed = 0
@@ -29,7 +29,7 @@ class ColorRunawayEffect(PixelEffect):
                 pl -= speed
                 pr += speed
 
-                if pl < 0 or pr > drawer.nLED - 1:
+                if pl < 0 or pr > drawer.n_led - 1:
                     break
 
                 for p in range(pl,pr):
@@ -50,7 +50,7 @@ class SwitchColorsEffect(PixelEffect):
             else:
                 step = 1
 
-            for ln in range(0,drawer.nLED - 1, 3):
+            for ln in range(0,drawer.n_led - 1, 3):
                 if step == 1:
                     drawer.set_color(ln, first_color)
                     drawer.set_color(ln+1, second_color)

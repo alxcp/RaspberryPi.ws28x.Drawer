@@ -11,6 +11,7 @@ html = '''<html>
               </body>
             </html>'''
 
+
 class ServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         print("GET request, Path:", self.path)
@@ -26,8 +27,9 @@ class ServerHandler(BaseHTTPRequestHandler):
         else:
             self.send_error(404, "Page Not Found {}".format(self.path))
 
-def server_thread(port):
-    server_address = ('', port)
+
+def server_thread(target_port):
+    server_address = ('', target_port)
     httpd = HTTPServer(server_address, ServerHandler)
     try:
         httpd.serve_forever()
@@ -35,9 +37,8 @@ def server_thread(port):
         pass
     httpd.server_close()
 
+
 if __name__ == '__main__':
     port = 8000
     print("Starting server at port %d" % port)
-    #raspberrypi_init()
     server_thread(port)
-    #raspberrypi_cleanup()
