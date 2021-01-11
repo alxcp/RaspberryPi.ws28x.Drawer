@@ -6,8 +6,6 @@ class DrawerBase(object):
     frames = []
     recording = False
 
-    stop_requested = False
-
     def __init__(self, n_led):
         self.n_led = n_led
         self.pixels_indexes = range(0, n_led - 1)
@@ -41,6 +39,3 @@ class DrawerBase(object):
 
     def show_frame(self, frame):
         raise NotImplementedError()
-
-    def stop(self):
-        self.stop_requested = True

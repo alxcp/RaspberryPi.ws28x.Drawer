@@ -1,8 +1,8 @@
 from datetime import datetime
 import random
 
-from effects.base import MatrixPixelEffect
-from helpers.color_rgb import ColorRGB
+from sources.effects.base import MatrixPixelEffect
+from sources.helpers.color_rgb import ColorRGB
 
 
 class FireEffect(MatrixPixelEffect):

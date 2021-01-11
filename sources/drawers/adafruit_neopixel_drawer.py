@@ -1,9 +1,9 @@
 import board
 import neopixel
 
-from helpers.color_rgb import ColorRGB
+from sources.helpers.color_rgb import ColorRGB
 
-from drawers.base import DrawerBase
+from sources.drawers.base import DrawerBase
 
 
 class NeoPixelDrawer(DrawerBase):
@@ -47,8 +47,8 @@ class NeoPixelDrawer(DrawerBase):
     intensity_max = 100
 
     def __init__(self, n_led):
+        super().__init__(n_led)
         self.pixels = neopixel.NeoPixel(board.D18, n_led, auto_write=False)
-        self.n_led = n_led
         self.clear()
         self.pixels_indexes = range(0, n_led - 1)
 

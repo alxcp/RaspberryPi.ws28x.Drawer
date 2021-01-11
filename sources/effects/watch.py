@@ -1,6 +1,6 @@
 from datetime import datetime
-from effects.base import MatrixPixelEffect
-from helpers.color_rgb import ColorRGB
+from sources.effects.base import MatrixPixelEffect
+from sources.helpers.color_rgb import ColorRGB
 
 
 class WatchEffect(MatrixPixelEffect):

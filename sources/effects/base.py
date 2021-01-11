@@ -11,29 +11,14 @@ class PixelEffect(object):
         print('Frame Delay: {0}'.format(frame_delay))
 
     def is_stop(self, timeout):
-        result = timeout.is_expired() or self.drawer.stop_requested
-        self.drawer.stop_requested = False
+        result = timeout.is_expired()  # or self.drawer.stop_requested
+        # self.drawer.stop_requested = False
         return result
-
-    def play(self, timeout):
-        self.started = datetime.now()
-        print('Playing {0} for {1}'.format(self.__class__.__name__, timeout))
-        frame_number = 0
-        while not self.is_stop(timeout):
-            elapsed = (datetime.now() - self.last_fps_populate).seconds
-            if elapsed > 10:
-                print('frame:{0}, fps: {1}'.format(frame_number, frame_number / elapsed))
-                self.last_fps_populate = datetime.now()
-            self.play_frame()
-            if self.frame_delay > 0:
-                time.sleep(self.frame_delay)
-            frame_number = frame_number + 1
-        print('end')
 
     def play_frame(self):
         raise NotImplementedError()
 
-    def name(self):
+    def get_name(self):
         return self.__class__.__name__
 
 

@@ -1,14 +1,7 @@
-import effects.registry
-
-import effects.different
-import effects.watch
-import effects.fire
-import effects.meteor_rain
-
 from effects.registry import PixelEffectsRegistry
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
-from drawers.virtual_console_drawer import ConsoleDrawer
+from drawers.console_drawer import ConsoleDrawer
 # from drawers.adafruit_neopixel_drawer import NeoPixelDrawer
 
 html = '''<html>
@@ -34,17 +27,17 @@ class ServerHandler(BaseHTTPRequestHandler):
 
         if self.path.endswith("/led/on"):
             print("led_pin, True")
-            start_drawer(self, drawer, pixel_effects, drawer_thread)
+            start_drawer(self, pixel_effects, drawer_thread)
         elif self.path.endswith("/led/off"):
             print("led_pin, False")
-            drawer.stop()
+            pixel_effects.stop()
             drawer_daemon.join()
             drawer.clear()
         elif self.path.endswith("/next/effect"):
-            drawer.stop()
+            pixel_effects.stop()
             drawer_daemon.join()
             drawer.clear()
-            start_drawer(self, drawer, pixel_effects, drawer_next_effect)
+            start_drawer(self, pixel_effects, drawer_next_effect)
         elif self.path == "/":
             print("home page")
         else:
@@ -54,7 +47,7 @@ class ServerHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(html.replace('{effect_name}', pixel_effects.current_effect.name()).encode('utf-8'))
+        self.wfile.write(html.replace('{effect_name}', pixel_effects.current_effect.get_name()).encode('utf-8'))
 
 
 def server_thread(target_port):
@@ -67,18 +60,18 @@ def server_thread(target_port):
     httpd.server_close()
 
 
-def drawer_thread(drw, eff):
+def drawer_thread(effects_registry):
     print('drawer thread started')
-    eff.play_effect(effects.different.RainbowWavesEffect(drw, 400, 4000))
+    effects_registry.play()
 
 
-def drawer_next_effect(drw, eff):
+def drawer_next_effect(effects_registry):
     print('next effect')
-    eff.next_effect()
+    effects_registry.play_next_effect()
 
 
-def start_drawer(self, drw, eff, fun):
-    self.drawer_daemon = threading.Thread(target=fun, args=(drw, eff), daemon=True)
+def start_drawer(self, effects_registry, function):
+    self.drawer_daemon = threading.Thread(target=function, args=[effects_registry], daemon=True)
     self.drawer_daemon.start()
 
 
@@ -86,7 +79,7 @@ if __name__ == '__main__':
     # drawer = NeoPixelDrawer(100)
     drawer = ConsoleDrawer(100)
     pixel_effects = PixelEffectsRegistry(drawer)
-    drawer_daemon = threading.Thread(target=drawer_thread, args=(drawer, pixel_effects), daemon=True)
+    drawer_daemon = threading.Thread(target=drawer_thread, args=[pixel_effects], daemon=True)
     drawer_daemon.start()
 
     port = 8000

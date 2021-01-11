@@ -1,6 +1,7 @@
+import time
 from colr import color
-from helpers.color_rgb import ColorRGB
-from drawers.base import DrawerBase
+from sources.helpers.color_rgb import ColorRGB
+from sources.drawers.base import DrawerBase
 
 
 class ConsoleDrawer(DrawerBase):
@@ -37,7 +38,7 @@ class ConsoleDrawer(DrawerBase):
             self.pixels[position] = ColorRGB(int(r), int(g), int(b))
 
     def set_empty(self, position):
-        self.pixels[position] = None
+        self.pixels[position] = ColorRGB()
 
     def show(self):
         row = ""
@@ -45,9 +46,11 @@ class ConsoleDrawer(DrawerBase):
             pixel = self.pixels[position]
 
             if pixel is None:
-                row += color("▌", fore=(0, 0, 0))
+                row += color('█', fore=(0, 0, 0))
             else:
-                row += color("▌", fore=(pixel.r, pixel.g, pixel.b))
+                row += color('█', fore=(pixel.r, pixel.g, pixel.b))
+
+        time.sleep(0.05)
 
         print(f'\r{row}', end='\r')
 

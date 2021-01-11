@@ -2,8 +2,8 @@ import colorsys
 import random
 import math
 
-from helpers.color_rgb import ColorRGB
-from effects.base import PixelEffect
+from sources.helpers.color_rgb import ColorRGB
+from sources.effects.base import PixelEffect
 
 
 class RainbowHSVEffect(PixelEffect):
